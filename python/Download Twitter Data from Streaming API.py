@@ -5,7 +5,6 @@
 
 import tweepy
 from time import time
-import pandas as pd
 import os,sys
 import json
 
