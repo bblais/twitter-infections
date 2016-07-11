@@ -1,25 +1,26 @@
 
 # coding: utf-8
 
-# In[10]:
+# In[14]:
 
 import tweepy
 from time import time
 import os,sys
 import json
+import gzip
 
 time_between_save=60*10  # 10 minutes
-save_fname='../data/test_data.json'
+save_fname='../data/raw_twitter_data.json.gz'
 
 
-# In[11]:
+# In[15]:
 
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 
 
-# In[12]:
+# In[16]:
 
 from pytz import timezone
 from datetime import datetime,timedelta
@@ -46,7 +47,7 @@ def unix_time(dt):
 # 
 #     {"csecret": "xxxxxxxx", "ckey": "xxxxxxxxxx", "asecret": "xxxxxxxxxx", "atoken": "xxxxxxxxxx"}
 
-# In[13]:
+# In[17]:
 
 with open('../../auth.json') as fid:
     auth_data=json.load(fid)
@@ -55,14 +56,22 @@ ckey,csecret,atoken,asecret=[auth_data[key]
                              for key in ['ckey','csecret','atoken','asecret']]    
 
 
-# In[14]:
+# In[18]:
 
 global mydata,last_save_time,start_time,onedata
 
+
+
+
 if os.path.exists(save_fname):
     print "Starting with %s..." % save_fname
-    with open(save_fname,'r') as fid:
-        mydata=json.load(fid)
+    
+    try:
+        with gzip.open(save_fname,'r') as fid:
+            mcmc_data=json.load(fid)
+    except IOError:
+        with open(save_fname,'r') as fid:
+            mcmc_data=json.load(fid)
 else:
     print "Starting Fresh..."
     mydata={}
@@ -71,7 +80,7 @@ start_time=None
 last_save_time=-1000
 
 
-# In[15]:
+# In[ ]:
 
 class listener(StreamListener):
 
@@ -95,7 +104,7 @@ class listener(StreamListener):
         if not hashtags:
             return True
 
-        with open("raw_tweet_lines.txt","a") as fid:
+        with open("../data/raw_tweet_lines.txt","a") as fid:
             line="%s,%s,%s\n" % (timestr,str(data['geo']),str(hashtags))
             fid.write(line)
                       
@@ -123,8 +132,13 @@ class listener(StreamListener):
         if time()>(last_save_time+time_between_save):
             last_save_time=time()
             
-            with open(save_fname,'w') as fid:
-                json.dump(mydata,fid)    
+            if '.gz' in save_fname:
+                with gzip.open(save_fname,'w') as fid:
+                    json.dump(mydata,fid)    
+            else:
+                with open(save_fname,'w') as fid:
+                    json.dump(mydata,fid)
+                    
             print "All data Saved..."
         
         return True

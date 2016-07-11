@@ -1,12 +1,12 @@
 
 # coding: utf-8
 
-# In[13]:
+# In[12]:
 
 get_ipython().magic(u'pylab inline')
 
 
-# In[14]:
+# In[13]:
 
 from Waitbar import Waitbar
 import os,sys
@@ -15,13 +15,13 @@ import gzip
 import json
 
 
-# In[15]:
+# In[14]:
 
 from pyndamics import *
 from pyndamics.emcee import *
 
 
-# In[16]:
+# In[15]:
 
 class NumpyAwareJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -33,7 +33,7 @@ class NumpyAwareJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-# In[17]:
+# In[16]:
 
 from pytz import timezone
 from datetime import datetime,timedelta
@@ -56,9 +56,9 @@ def unix_time(dt):
     
 
 
-# In[18]:
+# In[17]:
 
-which_file='../data/saved_twitter_data_jskaza'
+which_file='../data/raw_twitter_data'
 #which_file='saved_twitter_data_bblais'
 if os.path.exists(which_file+".json"):  
     with open(which_file+".json",'r') as fid:
@@ -70,19 +70,19 @@ else:
     raise ValueError,"only doing json this time"
 
 
-# In[19]:
+# In[18]:
 
 keys=mydata.keys()
 L=[len(mydata[key]['x']) for key in keys]
 
 
-# In[20]:
+# In[19]:
 
 L,keys=zip(*sorted(zip(L,keys),reverse=True))
 L[:10]
 
 
-# In[21]:
+# In[20]:
 
 max_t=None
 min_t=None
@@ -106,20 +106,21 @@ max_t=int(max_t)
 min_t=int(min_t)
 
 
-# In[22]:
+# In[21]:
 
 time2str(max_t-min_t)
 
 
-# In[23]:
+# In[24]:
 
 window=60*2*100
+
 min_count=5
 
 
-# In[ ]:
+# In[23]:
 
-save_fname='../data/mcmc_data_nyc_hours.json'
+save_fname='../data/mcmc_raw_twitter_data.json'
 if os.path.exists(save_fname):  
     with open(save_fname,'r') as fid:
         mcmc_data=json.load(fid)
@@ -136,7 +137,7 @@ n=16
 nc=ceil(sqrt(n));
 nr=ceil(n/nc);
 count=0
-for key in keys:
+for key in keys[:4]:  # get rid of the [:4] for a real problem - this is just for a demo
     
     if count%n==0:
         figure(figsize=(20,20))
